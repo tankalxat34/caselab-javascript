@@ -1,22 +1,25 @@
 /**
- * @param {number[]} arr
  * @param {Function} fn
- * @return {number[]}
+ * @return {Function}
  */
-var filter = function (arr, fn) {
-    for (let i = 0; i < arr.length; i++) {
-        console.log(i, arr[i], fn(arr[i], i));
-        if (!fn(arr[i], i)) {
-            arr.splice(i, 2);
+function memoize(fn) {
+    let cache = new Object();
+    return function (...args) {
+        const sargs = JSON.stringify(args);
+        if (!(sargs in cache)) {
+            cache[sargs] = fn(...args);
         }
+        return cache[sargs];
     }
-    return arr;
-};
-
-arr = [-2, -1, 0, 1, 2]
-fn = function plusOne(n) { return n + 1 }
+}
 
 
-const newArray = filter(arr, fn);
 
-console.log(newArray);
+let callCount = 0;
+const memoizedFn = memoize(function (a, b) {
+    callCount += 1;
+    return a + b;
+})
+memoizedFn(2, 3) // 5
+memoizedFn(2, 3) // 5
+console.log(callCount) // 1 
