@@ -1,25 +1,16 @@
 /**
- * @param {Function} fn
- * @return {Function}
+ * @param {number} millis
+ * @return {Promise}
  */
-function memoize(fn) {
-    let cache = new Object();
-    return function (...args) {
-        const sargs = JSON.stringify(args);
-        if (!(sargs in cache)) {
-            cache[sargs] = fn(...args);
-        }
-        return cache[sargs];
-    }
+async function sleep(millis) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => resolve(millis), millis)
+    }, millis)
 }
 
-
-
-let callCount = 0;
-const memoizedFn = memoize(function (a, b) {
-    callCount += 1;
-    return a + b;
-})
-memoizedFn(2, 3) // 5
-memoizedFn(2, 3) // 5
-console.log(callCount) // 1 
+/** 
+ * let t = Date.now()
+ * sleep(100).then(() => console.log(Date.now() - t)) // 100
+ */
+let t = Date.now()
+console.log(sleep(1000).then((e) => console.log(Date.now() - t, e)))
