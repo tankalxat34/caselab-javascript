@@ -18,10 +18,28 @@ const products = [
 
 let order = [];
 
+
+/**
+ * Метод группирует массив одинаковой структуры по какому либо ключу. Возвращает объект.
+ * @param {String} key Ключ, по которому надо сгруппировать массив
+ * @retuns Объект
+ */
+Array.prototype.groupBy = function (key) {
+    let newProducts = {};
+    for (let i = 0; i < this.length; i++) newProducts[this[i][key]] = { ...this[i] };
+    return newProducts;
+}
+
+
+const productsRestructured = products.groupBy("id");
+
+
+
 function addToBasket(productId) {
     // TODO: добавить проверку наличия товара в заказе (при наличии выдать alert, что товар уже в корзине)
-
     // TODO: если товар еще не в корзине, добавить его из массива products
+
+    Object.keys(order.groupBy("id")).includes(String(productId)) ? alert("Товар уже в корзине!") : order.push(productsRestructured[productId]);
 
     // Эти строчки не трогаем, они отвечают за переотрисовку страницы
     renderCart();
@@ -38,8 +56,10 @@ function removeFromBasket(productId) {
 
 
 function rerenderTotalPrice() {
-    // TODO: опишите функционал подсчета общей стоимости заказа
-
+    // √ TODO: опишите функционал подсчета общей стоимости заказа
+    let totalPrice = order.reduce((accumulator, item) => {
+        return accumulator + item.price;
+    }, 0);
 
     // Не меняйте эту строчку
     document.getElementById('total').innerText = totalPrice;
