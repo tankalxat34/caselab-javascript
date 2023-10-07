@@ -49,6 +49,13 @@ function addToBasket(productId) {
 function removeFromBasket(productId) {
     // TODO: описать логику удаления товара из корзины
 
+    for (let i = 0; i <= order.length; i++) {
+        if (order[i].id == productId) {
+            order.splice(i, 1);
+            break;
+        }
+    }
+
     // Эти строчки не трогаем, они отвечают за переотрисовку страницы
     renderCart();
     rerenderTotalPrice();
