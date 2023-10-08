@@ -4,6 +4,6 @@ window.onload = () => {
         document.querySelector("#spoiler").classList.toggle("closed");
     });
     document.addEventListener("keyup", (event) => {
-        if (event.keyCode === 27) document.querySelector("#spoiler").classList.add("closed");
+        if (!document.querySelector("#spoiler").classList.contains("closed") && event.keyCode === 27) document.querySelector("#spoiler").classList.add("closed");
     });
 }
