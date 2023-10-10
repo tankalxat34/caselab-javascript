@@ -1,5 +1,5 @@
 /*
-В этом файле я тренируюусь решать задачи, которые не входят в рамки курса на Leetcode
+В этом файле я тренируюусь решать задачи, которые не входят в рамки курса на Leetcode, но могут быть уточнены на протяжении Case Lab
 */
 
 
@@ -10,12 +10,12 @@ var UnitTester = {
     count: 0,
 
     _convertSign: {
-        "===":  (a, b) => a === b,
-        "!==":  (a, b) => a !== b,
-        "<=":   (a, b) => a <= b,
-        ">=":   (a, b) => a >= b,
-        "<":    (a, b) => a < b,
-        ">":    (a, b) => a > b
+        "===": (a, b) => a === b,
+        "!==": (a, b) => a !== b,
+        "<=": (a, b) => a <= b,
+        ">=": (a, b) => a >= b,
+        "<": (a, b) => a < b,
+        ">": (a, b) => a > b
     },
 
     /**
@@ -40,7 +40,8 @@ var UnitTester = {
                 time: lastTime,
                 awaitedAnswer: answer,
                 args: args,
-                comparsionSign: sign
+                comparsionSign: sign,
+                fnName: fn.name
             }
         }
     },
@@ -63,12 +64,23 @@ function camelCase(s) {
     }).join("");
 }
 
-// console.log(camelCase("font-family"));
-// console.log(camelCase("font_size"));
-// console.log(camelCase("camelCase"));
-// console.log(camelCase("must be as camel case"));
 
 console.log(UnitTester.case(camelCase, "===", "fontFamily", ["font-family"]).verdict);
 console.log(UnitTester.case(camelCase, "===", "fontSize", ["font_size"]).verdict);
 console.log(UnitTester.case(camelCase, "===", "camelCase", ["camelCase"]).verdict);
 console.log(UnitTester.case(camelCase, "===", "mustBeAsCamelCase", ["must be as camel_case"]).verdict);
+
+
+
+/**
+ * Получить среднее значение в массиве
+ */
+mean = function (arr) {
+    let amount = 0;
+    for (let i = 0; i < arr.length; i++) amount += arr[i];
+    return amount / arr.length;
+}
+
+
+console.log(UnitTester.case(mean, "===", 2.5, [[1, 2, 3, 4]]).verdict);
+
