@@ -60,3 +60,41 @@ ul {
 .close:hover {
     color:tomato
 }
+
+
+/* здесь я добавил свои стили для сообщений об ошибках */
+
+.msg {
+    position: fixed;
+    display: flex;
+    z-index: 1000;
+    border: 2px solid;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 10px 5%;
+    margin: 10px;
+    color: white;
+    word-wrap: break-word;
+    max-width: 55%;
+
+    -webkit-box-shadow: 12px 13px 14px 0px rgba(34, 60, 80, 0.2);
+    -moz-box-shadow: 12px 13px 14px 0px rgba(34, 60, 80, 0.2);
+    box-shadow: 12px 13px 14px 0px rgba(34, 60, 80, 0.2);
+
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+
+    cursor: pointer;
+}
+.msg.error {
+    background-color: #d35572;
+    border-color: #ea93a8;
+}
+.msg.info {
+    background-color: #6475d8;
+    border-color: #93b7ea;
+}
+.msg.warn {
+    background-color: #bab220;
+    border-color: #e2d679;
+}
