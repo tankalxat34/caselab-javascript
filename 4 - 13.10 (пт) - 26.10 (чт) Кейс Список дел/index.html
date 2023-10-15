@@ -11,6 +11,7 @@
 
 <body>
     <div id="informator"></div>
+    <div id="informatorShadow" class="closed"></div>
 
     <header>
         <h1>ToDo List</h1>
@@ -26,6 +27,11 @@
             </select>
             <button>Add Todo</button>
         </form>
+        <div id="paginator">
+            <a href="#" id="prevPage">← Previous</a>
+            <span id="pageNumber"></span>
+            <a href="#" id="nextPage">Next →</a>
+        </div>
         <ul id="todo-list"></ul>
     </main>
     

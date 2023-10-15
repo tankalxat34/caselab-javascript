@@ -62,7 +62,19 @@ ul {
 }
 
 
-/* здесь я добавил свои стили для сообщений об ошибках */
+/* здесь я добавил свои стили */
+.italic {
+    font-style: italic;
+}
+.bold {
+    font-weight: 700;
+}
+.underline {
+    text-decoration: underline;
+} 
+.crossed {
+    text-decoration: line-through;
+}
 
 .msg {
     position: fixed;
@@ -81,8 +93,8 @@ ul {
     box-shadow: 12px 13px 14px 0px rgba(34, 60, 80, 0.2);
 
     left: 50%;
-    top: 0;
-    transform: translateX(-50%);
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
 
     cursor: pointer;
 }
@@ -97,4 +109,55 @@ ul {
 .msg.warn {
     background-color: #bab220;
     border-color: #e2d679;
+}
+#informatorShadow {
+    position: absolute;
+    z-index: 500;
+    background-color: #00000084;
+    width: 100%;
+    height: 100%;
+}
+#informatorShadow.closed {
+    display: none;
+}
+
+
+.liTask {
+    margin: 5px;
+    padding: 10px;
+    display: flex;
+    font-family: Arial, Helvetica, sans-serif;
+    word-wrap: break-word;
+} 
+.liTask > label {
+    display: block;
+    width: 100%;
+    padding-left: 20px;
+}
+.liTask * {
+    cursor: pointer;
+}
+.liTask > button.btnRemove {
+    border: none;
+    background-color: inherit;
+    padding: 5px;
+    color: red;
+}
+
+#paginator {
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+}
+#paginator > a {
+    color: mediumorchid;
+    font-style: normal;
+    text-decoration: none;
+}
+#paginator > a:hover {
+    text-decoration: underline;
+}
+#pageNumber {
+    background-color: mediumorchid;
+    color: white;
+    padding: 10px;
 }
