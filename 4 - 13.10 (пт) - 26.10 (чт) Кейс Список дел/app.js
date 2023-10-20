@@ -8,6 +8,7 @@ const divInformatorShadow = document.querySelector("#informatorShadow");
 const _pageNumber = document.querySelector("#pageNumber");
 const aPrevPage = document.querySelector("#prevPage");
 const aNextPage = document.querySelector("#nextPage");
+const form = document.querySelector("form#addTodo");
 
 
 
@@ -100,6 +101,7 @@ var ToDo = {
     _changeCompleteListener: async function (event) {
         event.preventDefault();
         let targetElement = event.target;
+        console.log(targetElement);
         let targetId = event.target.getAttribute("data-id");
 
         let newState = targetElement.checked;
@@ -120,7 +122,7 @@ var ToDo = {
             return await response.json();
         } catch (error) {
             this.showAlert("error", "Server is unavailable. Check your internet connection and try again later");
-            return {isError: true, ...error};
+            return { isError: true, ...error };
         }
     },
 
@@ -147,7 +149,7 @@ var ToDo = {
             return await response.json();
         } catch (error) {
             this.showAlert("error", "Server is unavailable. Check your internet connection and try again later");
-            return {isError: true, ...error};
+            return { isError: true, ...error };
         }
     },
 
@@ -259,7 +261,7 @@ var ToDo = {
 
         } catch (error) {
             this.showAlert("error", "Server is unavailable. Check your internet connection and try again later");
-            return {isError: true, ...error};
+            return { isError: true, ...error };
         }
     }
 }
@@ -271,6 +273,21 @@ aPrevPage.addEventListener("click", () => {
 aNextPage.addEventListener("click", () => {
     ToDo.fillTodos(new Number(_pageNumber.innerText) + 1);
 });
+// Привязываем слушатель к форме
+form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    
+    let responseForm = {};
+
+    const formData = new FormData(form);
+    for (let entry of formData.entries()) {
+        responseForm[entry[0]] = entry[1];
+    }
+
+    form.reset();
+
+    ToDo.makeTodo(responseForm.todo, responseForm.user);
+})
 
 
 
