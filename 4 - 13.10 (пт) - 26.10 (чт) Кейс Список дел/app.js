@@ -1,13 +1,14 @@
 
-const selectorUserTodo       = document.querySelector("#user-todo");
-const inputNewTodo           = document.querySelector("#new-todo");
-const ulTodoList             = document.querySelector("#todo-list");
-const divInformator          = document.querySelector("#informator");
-const divInformatorShadow    = document.querySelector("#informatorShadow");
+const selectorUserTodo = document.querySelector("#user-todo");
+const inputNewTodo = document.querySelector("#new-todo");
+const ulTodoList = document.querySelector("#todo-list");
+const divInformator = document.querySelector("#informator");
+const divInformatorShadow = document.querySelector("#informatorShadow");
 
-const spanPageNumber         = document.querySelector("#pageNumber");
-const aPrevPage              = document.querySelector("#prevPage");
-const aNextPage              = document.querySelector("#nextPage");
+const _pageNumber = document.querySelector("#pageNumber");
+const aPrevPage = document.querySelector("#prevPage");
+const aNextPage = document.querySelector("#nextPage");
+
 
 
 /**
@@ -18,12 +19,19 @@ const ApiEndpoints = {
     todos: "https://jsonplaceholder.typicode.com/todos"
 }
 
+/**
+ * Возвращает значение параметра по его ключу в URL. Сделано исключительно для удобства работы с параметрами
+ * @param {String} s Наименование параметра
+ * @returns any Значение параметра
+ */
+URL.prototype.getParam = function (s) {
+    return this.searchParams.get(s);
+}
+
 
 Array.prototype.groupBy = function (key) {
     let result = {};
-    for (let i = 0; i < this.length; i++) {
-        result[this[i][key]] = { ...this[i] };
-    }
+    for (let i = 0; i < this.length; i++) result[this[i][key]] = { ...this[i] };
     return result;
 }
 
@@ -68,6 +76,9 @@ var ToDo = {
     fetchData: async function (method, url, ...args) {
         const request = new Request(url, {
             method: method,
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8',
+            },
             ...args
         });
 
@@ -81,7 +92,67 @@ var ToDo = {
     },
 
     /**
-     * Заполняет выпадающий список пользователями, а также создает свойство `users`, в котором хранятся все юзеры, сгруппированные по id. В случае ошибки ничего не заполняет.
+     * Фукнция, вызывающаяся при клике на checkbox
+     * 
+     * @param {Event} event Событие при клике на checkbox
+     * @returns Object ответ от сервера
+     */
+    _changeCompleteListener: async function (event) {
+        event.preventDefault();
+        let targetElement = event.target;
+        let targetId = event.target.getAttribute("data-id");
+
+        let newState = targetElement.checked;
+        try {
+            let response = await fetch(ApiEndpoints.todos.concat(`/${targetId}`), {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    completed: newState
+                }),
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                },
+            });
+
+            if (response.ok) targetElement.checked = newState;
+            else this.showAlert("error", "Server is unavailable. Check your internet connection and try again later");
+
+            return await response.json();
+        } catch (error) {
+            this.showAlert("error", "Server is unavailable. Check your internet connection and try again later");
+            return {isError: true, ...error};
+        }
+    },
+
+    /**
+     * Удаляет задачу из перечня только после запроса на сервер
+     * 
+     * @param {Element} taskNode Элемент на странице, в котором отображена задача
+     * @param {Number} taskId Идентификатор задачи
+     * @returns Object
+     */
+    _deleteTaskListener: async function (taskNode) {
+        try {
+            let taskId = taskNode.id;
+            let response = await fetch(ApiEndpoints.todos.concat(`/${taskId}`), {
+                method: 'DELETE',
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                },
+            });
+
+            if (response.ok) taskNode.remove();
+            else this.showAlert("error", "Server is unavailable. Check your internet connection and try again later");
+
+            return await response.json();
+        } catch (error) {
+            this.showAlert("error", "Server is unavailable. Check your internet connection and try again later");
+            return {isError: true, ...error};
+        }
+    },
+
+    /**
+     * Заполняет выпадающий список пользователями, а также создает свойство `ToDo.users`, в котором хранятся все юзеры, сгруппированные по id. В случае ошибки ничего не заполняет.
      * 
      * Возвращает `false`, если произошла ошибка. Иначе `true`
      */
@@ -92,7 +163,7 @@ var ToDo = {
         this.users = response.groupBy("id");
         selectorUserTodo.innerHTML = '';
 
-        for(let i = 0; i < response.length; i++) {
+        for (let i = 0; i < response.length; i++) {
             let option = document.createElement("option");
             option.innerText = response[i]?.name;
             option.value = response[i]["id"];
@@ -104,7 +175,42 @@ var ToDo = {
     },
 
     /**
-     * Отрисовывает задачи на странице
+     * Отрисовывает в DOM задачу
+     * @param {Object} taskObj Объект задачи, содержащий поля `userId`, `id`, `title` и `completed`
+     */
+    drawNewTask: async function (taskObj) {
+        let li = document.createElement("li");
+        li.classList = "liTask";
+        li.id = taskObj.id;
+
+        let input = document.createElement("input");
+        input.type = "checkbox";
+        input.id = `todoid-${taskObj.id}`;
+        input.setAttribute("data-id", taskObj.id);
+        input.setAttribute("data-userid", taskObj.userId);
+        input.checked = !!taskObj.completed;
+
+        input.addEventListener("click", async (event) => await this._changeCompleteListener(event));
+
+        let label = document.createElement("label");
+        label.setAttribute("for", input.id);
+        label.innerHTML = `<span>${taskObj.title} <span class="italic">by</span> <span class="bold">${this.users[taskObj.userId].name}</span></span>`
+
+        let btnRemove = document.createElement("button");
+        btnRemove.innerText = "❌";
+        btnRemove.classList = "btnRemove";
+
+        btnRemove.addEventListener("click", async (event) => await this._deleteTaskListener(li));
+
+        li.appendChild(input);
+        li.appendChild(label);
+        li.appendChild(btnRemove);
+
+        ulTodoList.appendChild(li);
+    },
+
+    /**
+     * Делает запрос на сервер и отрисовывает полученные в ответе задачи (через пагинацию по страницам)
      * 
      * Возвращает `false`, если произошла ошибка. Иначе `true`
      * @param {Number} pageNumber номер страницы (для пагинации)
@@ -112,53 +218,63 @@ var ToDo = {
     fillTodos: async function (pageNumber) {
         if (pageNumber <= 0) return false;
         let response = await this.fetchData("GET", ApiEndpoints.todos.concat(`?_page=${pageNumber}`));
-        if (response?.isError) return false;
+        if (response?.isError || !response.length) return false;
         ulTodoList.innerHTML = '';
-        spanPageNumber.innerText = pageNumber;
+        _pageNumber.innerText = pageNumber;
         this.todos = response.groupBy("id");
 
         for (let i = 0; i < response.length; i++) {
-            const task = response[i];
-
-            let li = document.createElement("li");
-            li.classList = "liTask";
-
-            let input = document.createElement("input");
-            input.type = "checkbox";
-            input.id = `todoid-${task.id}`;
-            input.setAttribute("data-id", task.id);
-            input.setAttribute("data-userid", task.userId);
-
-            let label = document.createElement("label");
-            label.setAttribute("for", input.id);
-            label.innerHTML = `<span>${task.title} <span class="italic">by</span> <span class="bold">${this.users[task.userId].name}</span></span>`
-
-            let btnRemove = document.createElement("button");
-            btnRemove.innerText = "❌";
-            btnRemove.classList = "btnRemove";
-            
-            li.appendChild(input);
-            li.appendChild(label);
-            li.appendChild(btnRemove);
-            
-            ulTodoList.appendChild(li);
+            this.drawNewTask(response[i]);
         }
 
         return false;
+    },
+
+    /**
+     * Добавить новую задачу для выбранного пользователя
+     * @param {String} title Текст новой задачи
+     * @param {Number} userId Идентификатор пользователя
+     */
+    makeTodo: async function (title, userId) {
+        try {
+            let response = await fetch(ApiEndpoints.todos, {
+                method: 'POST',
+                body: JSON.stringify({
+                    userId: userId,
+                    title: title,
+                    completed: false
+                }),
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                },
+            });
+
+            if (response.ok) {
+                let parsedResponse = await response.json();
+                this.drawNewTask(parsedResponse);
+                return parsedResponse;
+            } else {
+                this.showAlert("error", "Server is unavailable. Check your internet connection and try again later");
+            }
+
+        } catch (error) {
+            this.showAlert("error", "Server is unavailable. Check your internet connection and try again later");
+            return {isError: true, ...error};
+        }
     }
 }
 
 
 aPrevPage.addEventListener("click", () => {
-    let newPageNumber = new Number(spanPageNumber.innerText) - 1;
-    ToDo.fillTodos(newPageNumber);
+    ToDo.fillTodos(new Number(_pageNumber.innerText) - 1);
 });
 aNextPage.addEventListener("click", () => {
-    let newPageNumber = new Number(spanPageNumber.innerText) + 1;
-    ToDo.fillTodos(newPageNumber);
+    ToDo.fillTodos(new Number(_pageNumber.innerText) + 1);
 });
+
 
 
 ToDo.fillUsers()
-    .then(r => ToDo.fillTodos(Number(new URL(window.location.href).searchParams.get("page")) || 1))
+    .then(r => ToDo.fillTodos(Number(new URL(window.location.href).getParam("page")) || 1))
     .catch(error => ToDo.showAlert("error", error.message));
+
