@@ -143,21 +143,3 @@ ul {
     padding: 5px;
     color: red;
 }
-
-#paginator {
-    text-align: center;
-    font-family: Arial, Helvetica, sans-serif;
-}
-#paginator > a {
-    color: mediumorchid;
-    font-style: normal;
-    text-decoration: none;
-}
-#paginator > a:hover {
-    text-decoration: underline;
-}
-#pageNumber {
-    background-color: mediumorchid;
-    color: white;
-    padding: 10px;
-}

@@ -5,7 +5,6 @@ const ulTodoList = document.querySelector("#todo-list");
 const divInformator = document.querySelector("#informator");
 const divInformatorShadow = document.querySelector("#informatorShadow");
 
-const _pageNumber = document.querySelector("#pageNumber");
 const aPrevPage = document.querySelector("#prevPage");
 const aNextPage = document.querySelector("#nextPage");
 const form = document.querySelector("form#addTodo");
@@ -220,14 +219,11 @@ var ToDo = {
      * Делает запрос на сервер и отрисовывает полученные в ответе задачи (через пагинацию по страницам)
      * 
      * Возвращает `false`, если произошла ошибка. Иначе `true`
-     * @param {Number} pageNumber номер страницы (для пагинации)
      */
-    fillTodos: async function (pageNumber) {
-        if (pageNumber <= 0) return false;
-        let response = await this.fetchData("GET", ApiEndpoints.todos.concat(`?_page=${pageNumber}`));
+    fillTodos: async function () {
+        let response = await this.fetchData("GET", ApiEndpoints.todos);
         if (response?.isError || !response.length) return false;
         ulTodoList.innerHTML = '';
-        _pageNumber.innerText = pageNumber;
         this.todos = response.groupBy("id");
 
         for (let i = 0; i < response.length; i++) {
@@ -272,12 +268,6 @@ var ToDo = {
 }
 
 
-aPrevPage.addEventListener("click", () => {
-    ToDo.fillTodos(new Number(_pageNumber.innerText) - 1);
-});
-aNextPage.addEventListener("click", () => {
-    ToDo.fillTodos(new Number(_pageNumber.innerText) + 1);
-});
 // Привязываем слушатель к форме
 form.addEventListener("submit", function (event) {
     event.preventDefault();
