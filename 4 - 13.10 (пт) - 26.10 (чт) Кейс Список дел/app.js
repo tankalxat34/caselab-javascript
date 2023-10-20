@@ -101,7 +101,6 @@ var ToDo = {
     _changeCompleteListener: async function (event) {
         event.preventDefault();
         let targetElement = event.target;
-        console.log(targetElement);
         let targetId = event.target.getAttribute("data-id");
 
         let newState = targetElement.checked;
@@ -187,7 +186,9 @@ var ToDo = {
 
         let input = document.createElement("input");
         input.type = "checkbox";
-        input.id = `todoid-${taskObj.id}`;
+
+        // предотвращаем некорректное срабатывание нажатия по label в случае, если id задач совпадает
+        input.id = `todoid-${taskObj.id}-${Date.now()}`;
         input.setAttribute("data-id", taskObj.id);
         input.setAttribute("data-userid", taskObj.userId);
         input.checked = !!taskObj.completed;
@@ -208,7 +209,11 @@ var ToDo = {
         li.appendChild(label);
         li.appendChild(btnRemove);
 
-        ulTodoList.appendChild(li);
+        if (taskObj?.isNew) {
+            ulTodoList.insertBefore(li, ulTodoList.firstElementChild);
+        } else { 
+            ulTodoList.appendChild(li);
+        }
     },
 
     /**
@@ -253,7 +258,7 @@ var ToDo = {
 
             if (response.ok) {
                 let parsedResponse = await response.json();
-                this.drawNewTask(parsedResponse);
+                this.drawNewTask({isNew: true, ...parsedResponse});
                 return parsedResponse;
             } else {
                 this.showAlert("error", "Server is unavailable. Check your internet connection and try again later");
@@ -281,10 +286,17 @@ form.addEventListener("submit", function (event) {
 
     const formData = new FormData(form);
     for (let entry of formData.entries()) {
+        if (!(entry[0] && entry[1])) {
+            ToDo.showAlert("error", "You can not add new task without text and selected user!");
+            return false;
+        }
         responseForm[entry[0]] = entry[1];
     }
 
     form.reset();
+
+    // ToDo.fillTodos(10)
+    // .then(response => ToDo.makeTodo(responseForm.todo, responseForm.user));
 
     ToDo.makeTodo(responseForm.todo, responseForm.user);
 })
