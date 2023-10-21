@@ -14,21 +14,16 @@ const form = document.querySelector("form#addTodo");
 /**
  * **Константа.** Объект для хранения точек API. Не должен меняться внутри программы.
  */
-const ApiEndpoints = {
+const API_ENDPOINTS = {
     users: "https://jsonplaceholder.typicode.com/users",
     todos: "https://jsonplaceholder.typicode.com/todos"
 }
 
 /**
- * Возвращает значение параметра по его ключу в URL. Сделано исключительно для удобства работы с параметрами
- * @param {String} s Наименование параметра
- * @returns any Значение параметра
+ * Метод группирует массив одинаковой структуры по какому либо ключу. Возвращает объект.
+ * @param {String} key Ключ, по которому надо сгруппировать массив
+ * @retuns Объект
  */
-URL.prototype.getParam = function (s) {
-    return this.searchParams.get(s);
-}
-
-
 Array.prototype.groupBy = function (key) {
     let result = {};
     for (let i = 0; i < this.length; i++) result[this[i][key]] = { ...this[i] };
@@ -66,7 +61,7 @@ var ToDo = {
     },
 
     /**
-     * Асинхронная функция. Делает запрос на ApiEndpoint с помощью fetch с указанным телом запроса.
+     * Асинхронная функция. Делает запрос на API_ENDPOINT с помощью fetch с указанным телом запроса.
      * 
      * В случае успеха возвращает распарсенный JSON. В случае неудачи - возвращает ошибку и показывает уведомление об ошибке.
      * @param {String} method метод запроса
@@ -104,7 +99,7 @@ var ToDo = {
 
         let newState = targetElement.checked;
         try {
-            let response = await fetch(ApiEndpoints.todos.concat(`/${targetId}`), {
+            let response = await fetch(API_ENDPOINTS.todos.concat(`/${targetId}`), {
                 method: 'PATCH',
                 body: JSON.stringify({
                     completed: newState
@@ -134,7 +129,7 @@ var ToDo = {
     _deleteTaskListener: async function (taskNode) {
         try {
             let taskId = taskNode.id;
-            let response = await fetch(ApiEndpoints.todos.concat(`/${taskId}`), {
+            let response = await fetch(API_ENDPOINTS.todos.concat(`/${taskId}`), {
                 method: 'DELETE',
                 headers: {
                     'Content-type': 'application/json; charset=UTF-8',
@@ -157,7 +152,7 @@ var ToDo = {
      * Возвращает `false`, если произошла ошибка. Иначе `true`
      */
     fillUsers: async function () {
-        let response = await this.fetchData("GET", ApiEndpoints.users);
+        let response = await this.fetchData("GET", API_ENDPOINTS.users);
         if (response?.isError) return false;
         // сохраняем в текущий объект, сгруппированный по id, ответ от сервера
         this.users = response.groupBy("id");
@@ -221,7 +216,7 @@ var ToDo = {
      * Возвращает `false`, если произошла ошибка. Иначе `true`
      */
     fillTodos: async function () {
-        let response = await this.fetchData("GET", ApiEndpoints.todos);
+        let response = await this.fetchData("GET", API_ENDPOINTS.todos);
         if (response?.isError || !response.length) return false;
         ulTodoList.innerHTML = '';
         this.todos = response.groupBy("id");
@@ -240,7 +235,7 @@ var ToDo = {
      */
     makeTodo: async function (title, userId) {
         try {
-            let response = await fetch(ApiEndpoints.todos, {
+            let response = await fetch(API_ENDPOINTS.todos, {
                 method: 'POST',
                 body: JSON.stringify({
                     userId: userId,
@@ -268,7 +263,7 @@ var ToDo = {
 }
 
 
-// Привязываем слушатель к форме
+// Привязываем слушатель событий к форме
 form.addEventListener("submit", function (event) {
     event.preventDefault();
     
@@ -285,15 +280,12 @@ form.addEventListener("submit", function (event) {
 
     form.reset();
 
-    // ToDo.fillTodos(10)
-    // .then(response => ToDo.makeTodo(responseForm.todo, responseForm.user));
-
     ToDo.makeTodo(responseForm.todo, responseForm.user);
 })
 
 
 
 ToDo.fillUsers()
-    .then(r => ToDo.fillTodos(Number(new URL(window.location.href).getParam("page")) || 1))
+    .then(r => ToDo.fillTodos())
     .catch(error => ToDo.showAlert("error", error.message));
 
