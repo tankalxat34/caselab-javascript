@@ -5,8 +5,6 @@ const ulTodoList = document.querySelector("#todo-list");
 const divInformator = document.querySelector("#informator");
 const divInformatorShadow = document.querySelector("#informatorShadow");
 
-const aPrevPage = document.querySelector("#prevPage");
-const aNextPage = document.querySelector("#nextPage");
 const form = document.querySelector("form#addTodo");
 
 
