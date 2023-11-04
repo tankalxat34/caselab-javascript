@@ -1,24 +1,22 @@
 /**
- * @param {Array} arr
- * @param {Number} depth
- * @return {Array}
+ * @param {Array<Function>} functions
+ * @return {Promise<any>}
  */
-var flat = function (arr, n) {
-    if (!n) return arr;
-
-    arr.
+var promiseAll = async function(functions) {
+    return new Promise((resolve, reject) => {
+        // functions.forEach(func => resolve(func()));
+        let result = [];
+        functions.forEach(async f => {
+            f()
+            .then(resp => result.push(resp))
+            .catch(rej => result.push(rej))
+        })
+        resolve(result);
+    })
 };
 
 
-/*
-The maximum recursion depth
-
-Returns a new array with all sub-array elements concatenated into it recursively up to the specified depth.
-*/
-
-// arr = [1, 2, 3, [4, 5, 6], [7, 8, [9, 10, 11], 12], [13, 14, 15]]
-arr = [1, 2, 3, [4, 5, 6], [13, 14, 15]]
-n = 1
-
-
-console.log(flat(arr, n));
+// const promise = promiseAll([() => new Promise(res => res(42))])
+// const promise = promiseAll([() => new Promise(resolve => setTimeout(() => resolve(1), 200)), () => new Promise((resolve, reject) => setTimeout(() => reject("Error"), 100))])
+const promise = promiseAll([() => new Promise(resolve => setTimeout(() => resolve(4), 50)), () => new Promise(resolve => setTimeout(() => resolve(10), 150)), () => new Promise(resolve => setTimeout(() => resolve(16), 100))])
+promise.then(console.log); // [42]
